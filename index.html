@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#3fa9f5">
+    <title>Flappy Bird Deluxe</title>
+    <meta name="description" content="Flappy Bird Deluxe — day/night cycle, power-ups, skins, achievements and more.">
+    <link rel="icon" type="image/png" href="bird.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated page background -->
+    <div class="bg" aria-hidden="true">
+        <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
+        <i class="bgcloud c1"></i><i class="bgcloud c2"></i><i class="bgcloud c3"></i><i class="bgcloud c4"></i>
+    </div>
+
+    <main class="stage">
+        <div class="game" id="game">
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- ============ HUD ============ -->
+            <div class="hud hidden" id="hud">
+                <div class="hud-top">
+                    <div class="chip" id="hudCoinChip"><span class="coin-ico"></span><b id="hudCoins">0</b></div>
+                    <div class="score" id="hudScore">0</div>
+                    <button class="icon-btn glass" id="pauseBtn" aria-label="Pause">
+                        <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>
+                    </button>
+                </div>
+                <div class="powerups" id="powerups"></div>
+            </div>
+
+            <!-- ============ READY ============ -->
+            <div class="ready hidden" id="readyScreen">
+                <h2 data-i18n="getReady">Get Ready!</h2>
+                <div class="tap"><span class="ring"></span><span class="ring r2"></span><svg viewBox="0 0 24 24"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10l5.2 1.2A2.5 2.5 0 0 1 19 13.6V16a5 5 0 0 1-5 5h-1.6a5 5 0 0 1-3.9-1.9L5 15.4a1.6 1.6 0 0 1 2.4-2.1L9 15z"/></svg></div>
+                <p data-i18n="tapHint">Tap, click or press Space to flap</p>
+            </div>
+
+            <!-- ============ COUNTDOWN ============ -->
+            <div class="countdown hidden" id="countdown"><span id="countNum">3</span></div>
+
+            <!-- ============ MENU ============ -->
+            <section class="screen" id="menuScreen">
+                <div class="menu-top">
+                    <div class="logo">
+                        <div class="logo-bird" aria-hidden="true"></div>
+                        <h1 class="title"><span data-i18n="title1">Flappy</span> <span data-i18n="title2">Bird</span></h1>
+                        <p class="tagline" data-i18n="tagline">Tap to soar. Dodge the pipes.</p>
+                    </div>
+                </div>
+
+                <div class="menu-mid">
+                    <div class="chips">
+                        <div class="chip big"><span class="trophy-ico"></span><small data-i18n="best">Best</small><b id="menuBest">0</b></div>
+                        <div class="chip big"><span class="coin-ico"></span><small data-i18n="coins">Coins</small><b id="menuCoins">0</b></div>
+                    </div>
+
+                    <div class="skin card">
+                        <button class="arrow" id="skinPrev" aria-label="Previous skin"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+                        <div class="skin-stage">
+                            <canvas id="skinCanvas" width="204" height="144"></canvas>
+                            <span class="lock hidden" id="skinLock"><svg viewBox="0 0 24 24"><path d="M7 10V8a5 5 0 0 1 10 0v2h1.5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V8a3 3 0 0 0-6 0z"/></svg></span>
+                        </div>
+                        <button class="arrow" id="skinNext" aria-label="Next skin"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+                        <div class="skin-name" id="skinName">Classic</div>
+                        <div class="dots" id="skinDots"></div>
+                    </div>
+
+                    <div class="seg" id="diffSeg" role="radiogroup">
+                        <button data-diff="easy" data-i18n="easy">Easy</button>
+                        <button data-diff="normal" data-i18n="normal">Normal</button>
+                        <button data-diff="hard" data-i18n="hard">Hard</button>
+                        <span class="seg-thumb"></span>
+                    </div>
+                </div>
+
+                <div class="menu-bottom">
+                    <button class="btn gold hidden" id="buyBtn"><span class="coin-ico"></span><span id="buyLabel"></span></button>
+                    <button class="btn primary big" id="playBtn"><svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><span data-i18n="play">Play</span></button>
+                    <div class="tools">
+                        <button class="icon-btn glass" id="soundBtn" aria-label="Sound">
+                            <svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 3.8V5.7L7.5 9.5z"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none"/><path class="cross" d="M16 9l5 6M21 9l-5 6" fill="none"/></svg>
+                        </button>
+                        <button class="icon-btn glass" id="musicBtn" aria-label="Music">
+                            <svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12" fill="none"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path class="cross" d="M3 3l18 18" fill="none"/></svg>
+                        </button>
+                        <button class="icon-btn glass" id="langBtn" aria-label="Language"><b id="langLabel">ع</b></button>
+                        <button class="icon-btn glass" id="statsBtn" aria-label="Stats">
+                            <svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8.5 20h7" fill="none"/></svg>
+                        </button>
+                        <button class="icon-btn glass" id="helpBtn" aria-label="Help"><b>?</b></button>
+                        <button class="icon-btn glass" id="fsBtn" aria-label="Fullscreen">
+                            <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ PAUSE ============ -->
+            <section class="screen center hidden" id="pauseScreen">
+                <div class="card pop">
+                    <h2 data-i18n="paused">Paused</h2>
+                    <button class="btn primary" id="resumeBtn" data-i18n="resume">Resume</button>
+                    <button class="btn blue" id="pauseRestartBtn" data-i18n="restart">Restart</button>
+                    <button class="btn ghost" id="pauseMenuBtn" data-i18n="menu">Menu</button>
+                </div>
+            </section>
+
+            <!-- ============ GAME OVER ============ -->
+            <section class="screen center hidden" id="overScreen">
+                <div class="card over pop">
+                    <h2 data-i18n="gameOver">Game Over</h2>
+                    <div class="medal-wrap">
+                        <div class="medal none" id="medal"><span class="medal-star">★</span><i class="shine"></i></div>
+                        <span class="badge-new hidden" id="newBadge" data-i18n="newBest">New Best!</span>
+                    </div>
+                    <div class="over-grid">
+                        <div><small data-i18n="score">Score</small><b id="overScore">0</b></div>
+                        <div><small data-i18n="best">Best</small><b id="overBest">0</b></div>
+                        <div><small data-i18n="coins">Coins</small><b id="overCoins">0</b></div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn primary" id="againBtn" data-i18n="playAgain">Play Again</button>
+                        <button class="btn ghost" id="overMenuBtn" data-i18n="menu">Menu</button>
+                    </div>
+                    <button class="link-btn" id="shareBtn" data-i18n="share">Share score</button>
+                </div>
+            </section>
+
+            <!-- ============ STATS MODAL ============ -->
+            <section class="modal hidden" id="statsModal">
+                <div class="sheet">
+                    <header><h2 data-i18n="statsTitle">Stats & Achievements</h2><button class="icon-btn" data-close aria-label="Close">✕</button></header>
+                    <div class="sheet-body" id="statsBody"></div>
+                </div>
+            </section>
+
+            <!-- ============ HELP MODAL ============ -->
+            <section class="modal hidden" id="helpModal">
+                <div class="sheet">
+                    <header><h2 data-i18n="helpTitle">How to play</h2><button class="icon-btn" data-close aria-label="Close">✕</button></header>
+                    <div class="sheet-body help">
+                        <p data-i18n="help1">Tap, click or press Space / ↑ / W to flap. Pass through the gaps without touching the pipes.</p>
+                        <ul>
+                            <li><span class="pi shield"></span><div><b data-i18n="pu_shield">Shield</b><small data-i18n="pu_shield_d">Absorbs one hit.</small></div></li>
+                            <li><span class="pi slow"></span><div><b data-i18n="pu_slow">Slow-Mo</b><small data-i18n="pu_slow_d">Time slows down for a few seconds.</small></div></li>
+                            <li><span class="pi dbl"></span><div><b data-i18n="pu_dbl">Double</b><small data-i18n="pu_dbl_d">Every pipe is worth 2 points.</small></div></li>
+                            <li><span class="coin-ico"></span><div><b data-i18n="coins">Coins</b><small data-i18n="help_coin">Collect them to unlock new birds. Fly through the gap centre for a PERFECT bonus!</small></div></li>
+                        </ul>
+                        <div class="keys">
+                            <span><kbd>Space</kbd><kbd>↑</kbd><kbd>W</kbd> <em data-i18n="k_flap">Flap</em></span>
+                            <span><kbd>P</kbd><kbd>Esc</kbd> <em data-i18n="k_pause">Pause</em></span>
+                            <span><kbd>M</kbd> <em data-i18n="k_mute">Mute</em></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="toasts" id="toasts"></div>
+            <div class="flash" id="flash"></div>
+            <canvas id="fxCanvas"></canvas>
+        </div>
+    </main>
+
+    <noscript><p style="position:fixed;inset:0;display:grid;place-items:center;color:#fff;font:20px sans-serif">Please enable JavaScript to play.</p></noscript>
+    <script src="script.js"></script>
+</body>
+</html>
